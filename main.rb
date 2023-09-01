@@ -8,8 +8,8 @@
 # Take guess on each round, award hint for correct position
 # if number matches number in array award +1
 
-# 1 2 3 4
-# 1 5 4 3 [⚫ ○ ○]
+# 1 2 1 3
+# 1 5 3 1 [⚫ ○ ○]
 # Gives 1 number match and 1 direct match
 # number match = number match - direct match
 # 1 number in the wrong place, 1 number in the right place
@@ -30,20 +30,21 @@ class Mastermind
 
   def play
     #p computer_code = @computer.generate_code
-    p computer_code = [1, 1, 3, 4]
+    p computer_code = [1, 2, 1, 3]
     p guess = @player.make_guess
-    p compare_guess(computer_code, guess)
+     compare_guess(computer_code, guess)
   end 
 
   def compare_guess(computer_code, guess)
     feedback_array = []
-    positional_match = guess.map.with_index { |x,i| x == computer_code[i] }
+    positional_match = guess.map.with_index { |e,i| e == computer_code[i] }
     match_number = positional_match.count(true)
-    unformatted = feedback_array.fill("⚫", feedback_array.size, match_number)
-    #formatted_array = "[" + unformatted.join("").gsub('"', '') + "]"
+    feedback_array.fill("⚫", feedback_array.size, match_number)
 
-    #logic for number match
-
+    #logic for same number but not exact position
+    exist_count = computer_code.count{|e| guess.include?(e)} - match_number
+    feedback_array.fill("○", feedback_array.size, exist_count)
+    puts "Clues: #{feedback_array.join}"
 
   end
 
