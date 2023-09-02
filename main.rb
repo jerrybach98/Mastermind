@@ -7,11 +7,18 @@
 
 
 
-# Logic to handle invalid inputs
-# convert 1, 2, 3, 4 or 1 2 3 4 to > 1234
-# Class for game, codemaker, codebreaker
-# Explain rules in console before playing
-# Do a 12 round game loop
+# Refactor code to allow human player to choose
+# Add computer strategy >  start by having the computer guess randomly, but keep the ones that match exactly.
+# array = [" ", " ", " ", " "]
+# Code = [1, 2, 3, 4]
+# Generate random code and match it to array
+# Eg [1, 3, 5, 6]
+# if numbers match set the index position and fill in the array
+# once the array matches end the loop
+
+
+
+# object orient code, rubocop, private
 
 module Game
   def introduction 
@@ -29,7 +36,10 @@ module Game
     puts "Code: [1, 2, 3, 4]"
     puts "Guess: [1, 5, 3, 2] Clues: ● ● ○"
     puts " "
-    puts "Lets begin! Press ENTER to start:"
+    puts "Lets begin!"
+    puts "Enter: '1' to be the CODEBREAKER"
+    puts "Enter: '2' to be the CODEMAKER"
+    puts " "
   end
 end
 
@@ -38,14 +48,49 @@ class Mastermind
 
   def initialize (computer, player)
     introduction
-    @start = gets.chomp
+    puts @start = gets.chomp.to_i
     @computer = computer
     @player = player
     @round_number = 0
     @codebreaker_win = false
   end
 
-  def play
+  def choose_mode
+    if @start == 1
+      guess_mode
+    elsif @start == 2
+      breaker_mode
+    else 
+      puts "Invalid choice. Please enter '1' to be the CODEBREAKER or '2' to be the CODEMAKER."
+    end
+  end 
+
+  def breaker_mode
+    puts "You are the CODEMAKER make a code for the computer to break and press ENTER (Eg. '1234'):"
+    @player.create_code
+    12.times do 
+      guesses_left = 12 - @round_number
+      puts "Guesses remaining: #{guesses_left}"
+      @round_number += 1
+
+      #guess = @player.make_guess
+      #Replace with computer code generation
+      compare_guess(computer_code, guess)
+
+      if computer_code == guess
+        puts "CODEBREAKER wins!"
+        @codebreaker_win = true
+        break guess
+      end
+    end
+
+    if @codebreaker_win == false
+      puts "CODEBREAKER loses and CODEMAKER wins!"
+    end
+
+  end
+
+  def guess_mode
     p computer_code = @computer.generate_code
 
     12.times do 
@@ -57,14 +102,14 @@ class Mastermind
       compare_guess(computer_code, guess)
 
       if computer_code == guess
-        puts "Code guessor wins!"
+        puts "CODEBREAKER wins!"
         @codebreaker_win = true
         break guess
       end
     end
 
     if @codebreaker_win == false
-      puts "Code guessor loses and Codemaker wins!"
+      puts "CODEBREAKER loses and CODEMAKER wins!"
     end
 
   end 
@@ -92,10 +137,33 @@ end
 class Computer
   def generate_code
     puts "Code generated, try to break the code!"
-    puts "Enter your guess as a four digit code and press enter (Eg. 1234):"
+    puts "Enter your guess as a four digit code and press enter (Eg. '1234'):"
     Array.new(4) { rand(1...6) }
   end
+
+  def break_code
+    array = [1, 2, 3, 4]
+    guess = Array.new(4) {rand(1..6)}
+    array.each_with_index do |num, index|
+      if guess[index] == " "
+    end
+
+
+
+
+        array.each_with_index do |num, index|
+          if guess[index] == " "
+            guess [index] = num
+          end
+        end
+      end
+
+
+    break_code()
+
+
 end
+
 
 class Player
   
@@ -112,13 +180,13 @@ class Player
     end
   end
 
+  def create_code
+    player_code = gets.chomp
+  end
+
 end
 
-computer = Computer.new
-player = Player.new
-
-start_game = Mastermind.new(computer, player)
-start_game.play
-
-
-# 12 round game loop, instructions, game module
+  computer = Computer.new
+  player = Player.new
+  start_game = Mastermind.new(computer, player)
+  start_game.choose_mode
