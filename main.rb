@@ -142,25 +142,42 @@ class Computer
   end
 
   def break_code
-    array = [1, 2, 3, 4]
-    guess = Array.new(4) {rand(1..6)}
-    array.each_with_index do |num, index|
-      if guess[index] == " "
-    end
+    empty = [" ", " ", " ", " "]
+    p array = [1, 2, 3, 4]
+    round_number = 0
 
+    12.times do
+      round_number += 1
+      guess = Array.new(4) {rand(1..6)}
 
-
-
-        array.each_with_index do |num, index|
-          if guess[index] == " "
-            guess [index] = num
-          end
+      guess.each_with_index do |e, i|
+        if e == array[i]
+          empty[i] = array[i]
         end
       end
 
+      puts "Round #{round_number}:"
+      puts "Guess: #{guess.join(" ")}"
+      puts "Empty: #{empty.join(" ")}"
+      puts "------------"
 
+      if empty == array
+        break
+      end
+    end
+    p "final #{empty}"
+  end
     break_code()
 
+
+#  positional_match = guess.map.with_index { |e, i| e == computer_code[i] }
+# Add computer strategy >  start by having the computer guess randomly, but keep the ones that match exactly.
+# array = [" ", " ", " ", " "]
+# Code = [1, 2, 3, 4]
+# Generate random code and match it to array
+# Eg [1, 3, 5, 6]
+# if numbers match set the index position and fill in the array
+# once the array matches end the loop
 
 end
 
