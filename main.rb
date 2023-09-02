@@ -1,5 +1,6 @@
 # Use instance variables for state of game (turn number, secret code, feedback, names, configurable settings)
 # local: Current guess, winner, code for evaluation, valid_input, etc
+# If there's an "is-a" relationship, class inheritance is usually the correct choice. If there's a "has-a" relationship,
 
 # Brainstorm:
 #compare 1 dimensional code arrays to get guess array to indicate clues on each loop
@@ -7,23 +8,65 @@
 
 
 # Logic to handle invalid inputs
+# convert 1, 2, 3, 4 or 1 2 3 4 to > 1234
 # Class for game, codemaker, codebreaker
 # Explain rules in console before playing
 # Do a 12 round game loop
 
+module Game
+  def introduction 
+    puts "Welcome to Mastermind!"
+    puts " "
+    puts "The objective of Mastermind is to guess a secret code consisting of four numbers between 1-6 with duplicates allowed."
+    puts "Each guess results in feedback narrowing down the possibilities of the code."
+    puts "The codebreaker tries to guess the pattern in order within twelve turns."
+    puts " "
+    puts "Clues:"  
+    puts "● This clue means you have 1 correct number in the right location."
+    puts "○ This clue means you have 1 correct number in the wrong location."
+    puts " "
+    puts "Example:"
+    puts "Code: [1, 2, 3, 4]"
+    puts "Guess: [1, 5, 3, 2] Clues: ● ● ○"
+    puts " "
+    puts "Lets begin! Press ENTER to start:"
+  end
+end
+
 class Mastermind
+  include Game
+
   def initialize (computer, player)
-    puts "Welcome to Mastermind. The object of Mastermind is to guess a secret code consisting of a series of 4 numbers between 1-6 with duplicates allowed. Each guess results in feedback narrowing down the possibilities of the code. The codebreaker tries to guess the pattern in order within twelve turns. The feedback will indicate whether a guess is correct in both number and position as (●) or indicate the existence of a correct code placed in the wrong position as (○).
-    "
+    introduction
+    @start = gets.chomp
     @computer = computer
     @player = player
+    @round_number = 0
+    @codebreaker_win = false
   end
 
   def play
     p computer_code = @computer.generate_code
-    #p computer_code = [1, 1, 2, 2] 
-    p guess = @player.make_guess
-     compare_guess(computer_code, guess)
+
+    12.times do 
+      guesses_left = 12 - @round_number
+      puts "Guesses remaining: #{guesses_left}"
+      @round_number += 1
+
+      guess = @player.make_guess
+      compare_guess(computer_code, guess)
+
+      if computer_code == guess
+        puts "Code guessor wins!"
+        @codebreaker_win = true
+        break guess
+      end
+    end
+
+    if @codebreaker_win == false
+      puts "Code guessor loses and Codemaker wins!"
+    end
+
   end 
 
   def compare_guess(computer_code, guess)
@@ -40,8 +83,7 @@ class Mastermind
     #Compares modified array
     exist_count = modified_guess_array.count{|e| modified_code_array.include?(e)}
     feedback_array.fill("○ ", feedback_array.size, exist_count)
-    puts "Clues: #{feedback_array.join}"
-    p feedback_array
+    puts "#{guess} Clues: #{feedback_array.join}"
 
   end
 
@@ -49,7 +91,8 @@ end
 
 class Computer
   def generate_code
-    puts "Enter your guess as a four digit code: Eg. 1326"
+    puts "Code generated, try to break the code!"
+    puts "Enter your guess as a four digit code and press enter (Eg. 1234):"
     Array.new(4) { rand(1...6) }
   end
 end
@@ -71,11 +114,11 @@ class Player
 
 end
 
-class GameBoard
-end
-
 computer = Computer.new
 player = Player.new
 
 start_game = Mastermind.new(computer, player)
 start_game.play
+
+
+# 12 round game loop, instructions, game module
