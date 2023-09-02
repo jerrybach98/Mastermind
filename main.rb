@@ -67,14 +67,15 @@ class Mastermind
 
   def breaker_mode
     puts "You are the CODEMAKER make a code for the computer to break and press ENTER (Eg. '1234'):"
-    @player.create_code
+    p computer_code = @player.make_guess
+
     12.times do 
       guesses_left = 12 - @round_number
       puts "Guesses remaining: #{guesses_left}"
       @round_number += 1
 
-      #guess = @player.make_guess
-      #Replace with computer code generation
+      
+      guess = @computer.break_code(computer_code)
       compare_guess(computer_code, guess)
 
       if computer_code == guess
@@ -135,50 +136,26 @@ class Mastermind
 end
 
 class Computer
+  def initialize
+    @modified_array = Array.new(4) {rand(1..6)}
+  end
+
   def generate_code
     puts "Code generated, try to break the code!"
     puts "Enter your guess as a four digit code and press enter (Eg. '1234'):"
     Array.new(4) { rand(1...6) }
   end
 
-  def break_code
-    empty = [" ", " ", " ", " "]
-    p array = [1, 2, 3, 4]
-    round_number = 0
+  def break_code(computer_code)
+    array = Array.new(4) {rand(1..6)}
 
-    12.times do
-      round_number += 1
-      guess = Array.new(4) {rand(1..6)}
-
-      guess.each_with_index do |e, i|
-        if e == array[i]
-          empty[i] = array[i]
-        end
-      end
-
-      puts "Round #{round_number}:"
-      puts "Guess: #{guess.join(" ")}"
-      puts "Empty: #{empty.join(" ")}"
-      puts "------------"
-
-      if empty == array
-        break
+    array.each_with_index do |e, i|
+      if e == computer_code[i]
+        @modified_array[i] = computer_code[i]
       end
     end
-    p "final #{empty}"
+    return @modified_array
   end
-    break_code()
-
-
-#  positional_match = guess.map.with_index { |e, i| e == computer_code[i] }
-# Add computer strategy >  start by having the computer guess randomly, but keep the ones that match exactly.
-# array = [" ", " ", " ", " "]
-# Code = [1, 2, 3, 4]
-# Generate random code and match it to array
-# Eg [1, 3, 5, 6]
-# if numbers match set the index position and fill in the array
-# once the array matches end the loop
-
 end
 
 
@@ -197,8 +174,15 @@ class Player
     end
   end
 
-  def create_code
-    player_code = gets.chomp
+  def input_mode
+    loop do
+      input_value = gets.chomp.to_i
+        if guess_code.length != 4 || check == false
+          puts "Invalid input. Please enter a 4-digit code with digits between 1 and 6"
+          next
+        end
+      break substrings
+    end
   end
 
 end
