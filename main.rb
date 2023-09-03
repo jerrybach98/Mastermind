@@ -2,22 +2,9 @@
 # local: Current guess, winner, code for evaluation, valid_input, etc
 # If there's an "is-a" relationship, class inheritance is usually the correct choice. If there's a "has-a" relationship,
 
-# Brainstorm:
-#compare 1 dimensional code arrays to get guess array to indicate clues on each loop
-
-
-
-# Refactor code to allow human player to choose
-# Add computer strategy >  start by having the computer guess randomly, but keep the ones that match exactly.
-# array = [" ", " ", " ", " "]
-# Code = [1, 2, 3, 4]
-# Generate random code and match it to array
-# Eg [1, 3, 5, 6]
-# if numbers match set the index position and fill in the array
-# once the array matches end the loop
-
-
-
+# Correctly Takes input to choose mode
+# Game loop: reset intialized varables
+# Don't puts random generated code
 # object orient code, rubocop, private
 
 module Game
@@ -37,10 +24,31 @@ module Game
     puts "Guess: [1, 5, 3, 2] Clues: ● ● ○"
     puts " "
     puts "Lets begin!"
-    puts "Enter: '1' to be the CODEBREAKER"
-    puts "Enter: '2' to be the CODEMAKER"
     puts " "
   end
+
+  def play_again
+    loop do
+      puts "Play again? Y/N"
+      restart = gets.chomp.downcase
+        if restart == "n"
+          puts "Thank you for playing!"
+          exit
+        elsif restart == "y"  
+          break restart
+        end
+    end
+  end
+
+  def restart_game(restart)
+    if restart == "y"
+      @guesses_left = 12
+      @codebreaker_win = false
+      @round_number = 0
+      choose_mode() 
+    end
+  end
+
 end
 
 class Mastermind
@@ -48,30 +56,32 @@ class Mastermind
 
   def initialize (computer, player)
     introduction
-    puts @start = gets.chomp.to_i
     @computer = computer
+    @start
     @player = player
     @round_number = 0
+    @guesses_left = 12
     @codebreaker_win = false
   end
 
   def choose_mode
+    puts "Enter: '1' to be the CODEBREAKER"
+    puts "Enter: '2' to be the CODEMAKER"
+    @start = @player.input_mode
     if @start == 1
       guess_mode
     elsif @start == 2
       breaker_mode
-    else 
-      puts "Invalid choice. Please enter '1' to be the CODEBREAKER or '2' to be the CODEMAKER."
     end
   end 
 
   def breaker_mode
+    puts "Reminder: Code must be 4-digits with numbers between 1-6 (duplicates allowed)"
     puts "You are the CODEMAKER make a code for the computer to break and press ENTER (Eg. '1234'):"
     p computer_code = @player.make_guess
-
     12.times do 
-      guesses_left = 12 - @round_number
-      puts "Guesses remaining: #{guesses_left}"
+      @guesses_left = 12 - @round_number
+      puts "Guesses remaining: #{@guesses_left}"
       @round_number += 1
 
       
@@ -89,14 +99,15 @@ class Mastermind
       puts "CODEBREAKER loses and CODEMAKER wins!"
     end
 
+    restart = play_again()
+    restart_game(restart)
   end
 
   def guess_mode
     p computer_code = @computer.generate_code
-
     12.times do 
-      guesses_left = 12 - @round_number
-      puts "Guesses remaining: #{guesses_left}"
+      @guesses_left = 12 - @round_number
+      puts "Guesses remaining: #{@guesses_left}"
       @round_number += 1
 
       guess = @player.make_guess
@@ -112,6 +123,9 @@ class Mastermind
     if @codebreaker_win == false
       puts "CODEBREAKER loses and CODEMAKER wins!"
     end
+
+    restart = play_again()
+    restart_game(restart)
 
   end 
 
@@ -141,8 +155,10 @@ class Computer
   end
 
   def generate_code
-    puts "Code generated, try to break the code!"
-    puts "Enter your guess as a four digit code and press enter (Eg. '1234'):"
+    puts " "
+    puts "CODEMAKER has created a code, try to break it!"
+    puts "Reminder: Code must be 4-digits with numbers between 1-6 (duplicates allowed)"
+    puts "Enter your guess as a four digit code and press ENTER (Eg. '1234'):"
     Array.new(4) { rand(1...6) }
   end
 
@@ -167,7 +183,7 @@ class Player
       substrings = guess_code.split(//).map(&:to_i)
       check = substrings.all? { |num| num.between?(1, 6)}
         if guess_code.length != 4 || check == false
-          puts "Invalid input. Please enter a 4-digit code with digits between 1 and 6"
+          puts "Invalid input, please enter a 4-digit code with digits between 1 and 6"
           next
         end
       break substrings
@@ -177,11 +193,11 @@ class Player
   def input_mode
     loop do
       input_value = gets.chomp.to_i
-        if guess_code.length != 4 || check == false
-          puts "Invalid input. Please enter a 4-digit code with digits between 1 and 6"
-          next
+        if input_value == 1 || input_value == 2  
+          break input_value
+        else
+          puts "Invalid choice. Please enter '1' to be the CODEBREAKER or '2' to be the CODEMAKER."
         end
-      break substrings
     end
   end
 
@@ -191,3 +207,4 @@ end
   player = Player.new
   start_game = Mastermind.new(computer, player)
   start_game.choose_mode
+
