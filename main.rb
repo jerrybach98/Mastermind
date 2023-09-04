@@ -2,12 +2,10 @@
 # local: Current guess, winner, code for evaluation, valid_input, etc
 
 
-#  private,  Refactor variable name to reflect both modes, take more input
-
-# object orient code, rubocop, Add high level comments,
+# rubocop,
 
 
-# Handles explaing rules and ending a game
+# Module handles start by explaining rules and ending game
 module Game
   def introduction 
     puts "Welcome to Mastermind!"
@@ -82,8 +80,8 @@ class Mastermind
   def breaker_mode
     puts "Reminder: Code must be 4-digits with numbers between 1-6 (duplicates allowed)"
     puts "You are the CODEMAKER make a code for the computer to break and press ENTER (Eg. '1234'):"
-    # 
     undeciphered_code = @player.make_guess
+
     12.times do 
       @guesses_left = 12 - @round_number
       puts "Guesses remaining: #{@guesses_left}"
@@ -108,8 +106,11 @@ class Mastermind
     restart_game(restart)
   end
 
+  # Computer generates code for human to figure out
   def guess_mode
+    # Generate both code and game prompt in method
     p undeciphered_code = @computer.generate_code
+
     12.times do 
       @guesses_left = 12 - @round_number
       puts "Guesses remaining: #{@guesses_left}"
@@ -119,7 +120,7 @@ class Mastermind
       compare_guess(undeciphered_code, guess)
 
       if undeciphered_code == guess
-        puts "You win, you figured out the CODEMAKER\'s code!"
+        puts "You win, you figured out the CODEMAKER's code!"
         @codebreaker_win = true
         break guess
       end
@@ -136,24 +137,24 @@ class Mastermind
 
   def compare_guess(undeciphered_code, guess)
     feedback_array = []
-    # Returns true in match positions and counts number of trues in array
+    # Returns true in matched positions and counts number of trues in array
     positional_match = guess.map.with_index { |e, i| e == undeciphered_code[i] }
     match_number = positional_match.count(true)
     feedback_array.fill("● ", feedback_array.size, match_number)
 
-    # Remove positional matches from array
+    # Remove true matches from array
     modified_guess_array = guess.reject.with_index { |e, i| positional_match[i] }
     modified_code_array = undeciphered_code.reject.with_index { |e, i| positional_match[i] }
 
-    #Compares modified array
+    # Compares modified array for positions that exists
     exist_count = modified_guess_array.count{|e| modified_code_array.include?(e)}
     feedback_array.fill("○ ", feedback_array.size, exist_count)
+
     puts "#{guess} Clues: #{feedback_array.join}"
-
   end
-
 end
 
+# Computer randomly generates code and undeciphers code using random matches
 class Computer
   def initialize
     @modified_array = Array.new(4) {rand(1..6)}
@@ -181,6 +182,7 @@ end
 
 
 class Player
+  # Handles input for both human inputs for guesses and code generation
   def make_guess
     loop do
       guess_code = gets.chomp.strip.gsub(/[\s,]+/, '')
@@ -194,6 +196,7 @@ class Player
     end
   end
 
+  # Input for mode choice
   def input_mode
     loop do
       input_value = gets.chomp.to_i
@@ -207,8 +210,9 @@ class Player
 
 end
 
-  computer = Computer.new
-  player = Player.new
-  start_game = Mastermind.new(computer, player)
-  start_game.choose_mode
+# Create objects to start game
+computer = Computer.new
+player = Player.new
+start_game = Mastermind.new(computer, player)
+start_game.choose_mode
 
