@@ -1,12 +1,13 @@
 # Use instance variables for state of game (turn number, secret code, feedback, names, configurable settings)
 # local: Current guess, winner, code for evaluation, valid_input, etc
-# If there's an "is-a" relationship, class inheritance is usually the correct choice. If there's a "has-a" relationship,
 
-# Correctly Takes input to choose mode
-# Game loop: reset intialized varables
-# Don't puts random generated code
-# object orient code, rubocop, private
 
+#  private,  Refactor variable name to reflect both modes, take more input
+
+# object orient code, rubocop, Add high level comments,
+
+
+# Handles explaing rules and ending a game
 module Game
   def introduction 
     puts "Welcome to Mastermind!"
@@ -27,6 +28,7 @@ module Game
     puts " "
   end
 
+  # Takes input to restart or end game, restarting game resets variables
   def play_again
     loop do
       puts "Play again? Y/N"
@@ -48,12 +50,12 @@ module Game
       choose_mode() 
     end
   end
-
 end
 
 class Mastermind
   include Game
 
+  # Variables represent state of game
   def initialize (computer, player)
     introduction
     @computer = computer
@@ -75,28 +77,31 @@ class Mastermind
     end
   end 
 
+  private
+  # Player makes a code for computer to break
   def breaker_mode
     puts "Reminder: Code must be 4-digits with numbers between 1-6 (duplicates allowed)"
     puts "You are the CODEMAKER make a code for the computer to break and press ENTER (Eg. '1234'):"
-    p computer_code = @player.make_guess
+    # 
+    undeciphered_code = @player.make_guess
     12.times do 
       @guesses_left = 12 - @round_number
       puts "Guesses remaining: #{@guesses_left}"
       @round_number += 1
 
       
-      guess = @computer.break_code(computer_code)
-      compare_guess(computer_code, guess)
+      guess = @computer.break_code(undeciphered_code)
+      compare_guess(undeciphered_code, guess)
 
-      if computer_code == guess
-        puts "CODEBREAKER wins!"
+      if undeciphered_code == guess
+        puts "You lose, CODEBREAKER figured out your code!"
         @codebreaker_win = true
         break guess
       end
     end
 
     if @codebreaker_win == false
-      puts "CODEBREAKER loses and CODEMAKER wins!"
+      puts "You win, CODEBREAKER failed to figure out your code!"
     end
 
     restart = play_again()
@@ -104,24 +109,24 @@ class Mastermind
   end
 
   def guess_mode
-    p computer_code = @computer.generate_code
+    p undeciphered_code = @computer.generate_code
     12.times do 
       @guesses_left = 12 - @round_number
       puts "Guesses remaining: #{@guesses_left}"
       @round_number += 1
 
       guess = @player.make_guess
-      compare_guess(computer_code, guess)
+      compare_guess(undeciphered_code, guess)
 
-      if computer_code == guess
-        puts "CODEBREAKER wins!"
+      if undeciphered_code == guess
+        puts "You win, you figured out the CODEMAKER\'s code!"
         @codebreaker_win = true
         break guess
       end
     end
 
     if @codebreaker_win == false
-      puts "CODEBREAKER loses and CODEMAKER wins!"
+      puts "You lose, you failed to figure out the CODEMAKER's code!"
     end
 
     restart = play_again()
@@ -129,16 +134,16 @@ class Mastermind
 
   end 
 
-  def compare_guess(computer_code, guess)
+  def compare_guess(undeciphered_code, guess)
     feedback_array = []
     # Returns true in match positions and counts number of trues in array
-    positional_match = guess.map.with_index { |e, i| e == computer_code[i] }
+    positional_match = guess.map.with_index { |e, i| e == undeciphered_code[i] }
     match_number = positional_match.count(true)
     feedback_array.fill("● ", feedback_array.size, match_number)
 
     # Remove positional matches from array
     modified_guess_array = guess.reject.with_index { |e, i| positional_match[i] }
-    modified_code_array = computer_code.reject.with_index { |e, i| positional_match[i] }
+    modified_code_array = undeciphered_code.reject.with_index { |e, i| positional_match[i] }
 
     #Compares modified array
     exist_count = modified_guess_array.count{|e| modified_code_array.include?(e)}
@@ -162,12 +167,12 @@ class Computer
     Array.new(4) { rand(1...6) }
   end
 
-  def break_code(computer_code)
+  def break_code(undeciphered_code)
     array = Array.new(4) {rand(1..6)}
 
     array.each_with_index do |e, i|
-      if e == computer_code[i]
-        @modified_array[i] = computer_code[i]
+      if e == undeciphered_code[i]
+        @modified_array[i] = undeciphered_code[i]
       end
     end
     return @modified_array
@@ -176,14 +181,13 @@ end
 
 
 class Player
-  
   def make_guess
     loop do
-      guess_code = gets.chomp
+      guess_code = gets.chomp.strip.gsub(/[\s,]+/, '')
       substrings = guess_code.split(//).map(&:to_i)
       check = substrings.all? { |num| num.between?(1, 6)}
         if guess_code.length != 4 || check == false
-          puts "Invalid input, please enter a 4-digit code with digits between 1 and 6"
+          puts "Invalid input, please enter a 4-digit code with digits between 1 and 6 (Eg. '1234')"
           next
         end
       break substrings
